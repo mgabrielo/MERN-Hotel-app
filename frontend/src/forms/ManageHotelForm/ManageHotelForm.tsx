@@ -40,7 +40,7 @@ const ManageHotelForm = ({onSave, isLoading}:ManageHotelFormType) => {
         formData.append("adultCount", data.adultCount.toString())
         formData.append("childCount", data.childCount.toString())
         data.facilities.forEach((facility, index)=>{
-            formData.append(`facilities-[${index}]`, facility)
+            formData.append(`facilities[${index}]`, facility)
         })
         Array.from(data.imageFiles).forEach((imageFile)=>{
             formData.append(`imageFiles`, imageFile)
