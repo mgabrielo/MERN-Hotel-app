@@ -53,3 +53,19 @@ export const logOut = async () => {
       if (err) throw new Error(err?.message);
     });
 };
+
+export const addMyHotel = async (hotelFormData: FormData) => {
+  const response = await axios
+    .post(`${API_BASE_URL}/api/my-hotels`, hotelFormData, {
+      withCredentials: true,
+    })
+    .then((res) => {
+      if (res.status == 201 && res.data) {
+        return res.data.hotel;
+      }
+    })
+    .catch((err) => {
+      throw new Error(err?.message);
+    });
+  return response;
+};
