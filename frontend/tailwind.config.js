@@ -8,9 +8,9 @@ export default {
     extend: {},
     container: {
       padding: {
+        sm: "2rem",
         md: "7rem",
-        sm: "2rem"
-      }
+      },
     }
   },
   plugins: [],
