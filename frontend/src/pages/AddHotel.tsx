@@ -13,11 +13,11 @@ const AddHotel = () => {
             showToast({message:err?.message, type:"ERROR"})
         }
     })
-    console.log('muationData-',data)
+    console.log('mutationData-',data)
     const handleSave=(hotelFormData:FormData)=>{
         mutate(hotelFormData)
-        
     }
+    
   return (
     <ManageHotelForm onSave={handleSave} isLoading= {isLoading}/>
   )

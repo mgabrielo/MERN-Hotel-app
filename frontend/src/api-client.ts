@@ -85,3 +85,38 @@ export const fetchMyHotels = async (): Promise<HotelType[]> => {
     });
   return response;
 };
+
+export const fetchMyHotelById = async (hotelId: string): Promise<HotelType> => {
+  const response = await axios
+    .get(`${API_BASE_URL}/api/my-hotels/${hotelId}`, { withCredentials: true })
+    .then((res) => {
+      if (res.status == 200 && res.data) {
+        return res.data?.hotel;
+      }
+    })
+    .catch((err) => {
+      throw new Error(err?.message);
+    });
+  return response;
+};
+
+export const updateMyHotelById = async (
+  hotelFormData: FormData
+): Promise<HotelType> => {
+  const response = await axios
+    .put(
+      `${API_BASE_URL}/api/my-hotels/${hotelFormData.get("hotelId")}`,
+      hotelFormData,
+      { withCredentials: true }
+    )
+    .then((res) => {
+      if (res.status == 200 && res.data) {
+        console.log("apidata", res.data);
+        return res.data;
+      }
+    })
+    .catch((err) => {
+      throw new Error(err?.message);
+    });
+  return response;
+};

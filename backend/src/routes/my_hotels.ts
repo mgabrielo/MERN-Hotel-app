@@ -39,13 +39,7 @@ router.post(
     try {
       const imageFiles = req.files as Express.Multer.File[];
       const newHotel: HotelType = req.body;
-      const uploadPromise = imageFiles.map(async (image) => {
-        const base64Img = Buffer.from(image.buffer).toString("base64");
-        let data_uri = "data:" + image.mimetype + ";base64," + base64Img;
-        const res = await cloudinary.v2.uploader.upload(data_uri);
-        return res.url;
-      });
-      const imageURLs = await Promise.all(uploadPromise);
+      const imageURLs = await uploadImages(imageFiles);
       newHotel.imageUrls = imageURLs;
       newHotel.lastUpdated = new Date();
       newHotel.userId = req?.userId;
@@ -68,5 +62,61 @@ router.get("/", verifyToken, async (req: Request, res: Response) => {
     res.status(500).json({ message: "something went wrong" });
   }
 });
+
+router.get("/:id", verifyToken, async (req: Request, res: Response) => {
+  const id = req.params.id.toString();
+  try {
+    const hotel = await Hotel.findOne({ _id: id, userId: req.userId });
+    if (!hotel) {
+      res.status(404).json({ message: "Hotel Not Found" });
+    }
+    return res.status(200).json({ hotel: hotel });
+  } catch (error) {
+    res.status(500).json({ message: "something went wrong" });
+  }
+});
+
+router.put(
+  "/:hotelId",
+  verifyToken,
+  upload.array("imageFiles"),
+  async (req: Request, res: Response) => {
+    const id = req.params.hotelId;
+    try {
+      const updatedHotel: HotelType = req.body;
+      const hotel = await Hotel.findOneAndUpdate(
+        { _id: id, userId: req.userId },
+        updatedHotel,
+        { new: true }
+      );
+      if (!hotel) {
+        res.status(404).json({ message: "Hotel Not Found" });
+      }
+      const files = req.files as Express.Multer.File[];
+      const updatedImgUrls = await uploadImages(files);
+      if (hotel) {
+        hotel.imageUrls = [
+          ...updatedImgUrls,
+          ...(updatedHotel.imageUrls || []),
+        ];
+        await hotel.save();
+        res.status(200).json({ hotel: hotel });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "something went wrong" });
+    }
+  }
+);
+
+async function uploadImages(imageFiles: Express.Multer.File[]) {
+  const uploadPromise = imageFiles.map(async (image) => {
+    const base64Img = Buffer.from(image.buffer).toString("base64");
+    let data_uri = "data:" + image.mimetype + ";base64," + base64Img;
+    const res = await cloudinary.v2.uploader.upload(data_uri);
+    return res.url;
+  });
+  const imageURLs = await Promise.all(uploadPromise);
+  return imageURLs;
+}
 
 export default router;

@@ -4,6 +4,8 @@ import HotelTypeSection from "./HotelTypeSection";
 import FacilitiesSection from "./FacilitiesSection";
 import GuestSection from "./GuestSection";
 import ImageSection from "./ImageSection";
+import { HotelType } from "../../../../backend/src/models/hotel";
+import { useEffect } from "react";
 
 export type HotelFormData = {
     name: string;
@@ -17,19 +19,29 @@ export type HotelFormData = {
     pricePerNight: number;
     starRating: number;
     imageFiles: FileList;
+    imageUrls?:string[]
 };
-
 type ManageHotelFormType={
- onSave:(hotelFormData:FormData)=> void,
-isLoading:boolean
+    hotel?:HotelType
+    onSave:(hotelFormData: FormData) => void,
+    isLoading?:boolean,
 }
-const ManageHotelForm = ({onSave, isLoading}:ManageHotelFormType) => {
+
+const ManageHotelForm = ({onSave, isLoading, hotel}:ManageHotelFormType) => {
     const formMethods=useForm<HotelFormData>();
-    const {handleSubmit} = formMethods
+    const {handleSubmit, reset} = formMethods
+
+    useEffect(()=>{
+        reset(hotel)
+    },[hotel, reset])
 
     const onSubmit=handleSubmit((data:HotelFormData)=>{
-        console.log(data)
+        console.log('data' , data)
         const formData = new FormData()
+
+        if(hotel){
+            formData.append("hotelId", hotel._id)
+        }
         formData.append("name", data.name)
         formData.append("city", data.city)
         formData.append("country", data.country)
@@ -42,9 +54,16 @@ const ManageHotelForm = ({onSave, isLoading}:ManageHotelFormType) => {
         data.facilities.forEach((facility, index)=>{
             formData.append(`facilities[${index}]`, facility)
         })
+        // for adding a hotel
         Array.from(data.imageFiles).forEach((imageFile)=>{
             formData.append(`imageFiles`, imageFile)
         })
+        // for updating a hotel
+        if(data.imageUrls){
+            data.imageUrls.forEach((url,index)=>{
+                formData.append(`imageUrls[${index}]`, url)
+            })
+        }
         onSave(formData)
     })
   return (

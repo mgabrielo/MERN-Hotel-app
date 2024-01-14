@@ -35,3 +35,34 @@ test("should allow user to add a hotel", async ({ page }) => {
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByText("Hotel Saved")).toBeVisible();
 });
+
+test("should display user hotels", async ({ page }) => {
+  await page.goto(`${CLIENT_URL}/my-hotels`);
+  await expect(page.getByText("hot hotel")).toBeVisible();
+  await expect(page.getByText("Hot Holidays with Sunsets")).toBeVisible();
+  await expect(page.getByText("hot city, Chille")).toBeVisible();
+  await expect(page.getByText("Romantic")).toBeVisible();
+  await expect(page.getByText("£ 2 per Night")).toBeVisible();
+  await expect(page.getByText("4 Star Rating")).toBeVisible();
+  await expect(page.getByText("2 adult(s), 3 child(s)")).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "View Details" }).first()
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Add Hotel" })).toBeVisible();
+});
+
+test("should edit hotel", async ({ page }) => {
+  await page.goto(`${CLIENT_URL}/my-hotels`);
+  await page.getByRole("link", { name: "View Details" }).first().click();
+  await page.waitForSelector('[name="name"]', { state: "attached" });
+  await expect(page.locator('[name="name"]')).toHaveValue("hot hotel update");
+  await page.locator('[name="name"]').fill("hot hotel new update");
+  await page.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByText("Hotel Updated")).toBeVisible();
+  await page.reload();
+  await expect(page.locator('[name="name"]')).toHaveValue(
+    "hot hotel new update"
+  );
+  await page.locator('[name="name"]').fill("hot hotel update");
+  await page.getByRole("button", { name: "Save" }).click();
+});
